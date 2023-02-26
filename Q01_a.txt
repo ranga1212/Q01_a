@@ -1,0 +1,1001 @@
+<---------- Circle RPC ---------->
+1) circle.x
+struct radius{
+	int r;
+};
+program criclePro{
+	version circleVer{
+
+		float area(radius) = 2;
+		float circumference(radius) = 3;
+		float diameter(radius) = 4;
+	} = 1; 
+} = 0x21234567;
+
+<========== Run ==========>
+rpcgen -aC circle.x
+
+
+2)circle_server.c
+#include "circle.h"
+
+float *
+area_1_svc(radius *argp, struct svc_req *rqstp)
+{
+	<=== static float  result; ===>
+	<=== result = argp->r * argp->r*3.14; ===>
+	<=== return &result; ===>
+}
+
+float *
+circumference_1_svc(radius *argp, struct svc_req *rqstp)
+{
+	<=== static float  result; ===>
+	<=== result = argp->r*3.14*2; ===>
+	<=== return &result; ===>
+}
+
+float *
+diameter_1_svc(radius *argp, struct svc_req *rqstp)
+{
+	<=== static float  result; ===>
+	<=== result = argp->r*2; ===>
+	<=== return &result; ===>
+}
+
+3)circle_client.c
+#include "circle.h"
+void
+criclepro_1(char *host)
+{
+	CLIENT *clnt;
+	float  *result_1;
+	radius  area_1_arg;
+	float  *result_2;
+	radius  circumference_1_arg;
+	float  *result_3;
+	radius  diameter_1_arg;
+#ifndef	DEBUG
+	clnt = clnt_create (host, criclePro, circleVer, "udp");
+	if (clnt == NULL) {
+		clnt_pcreateerror (host);
+		exit (1);
+	}
+#endif	/* DEBUG */
+	<=== printf("\nEnter radius:- "); ===>
+	<=== scanf("%d",&area_1_arg.r); ===>
+
+	result_1 = area_1(&area_1_arg, clnt);
+	if (result_1 == (float *) NULL) {
+		clnt_perror (clnt, "call failed");
+	}else{
+		printf("The are is: %.2lf", *result_1);
+	}
+
+	<=== printf("\nEnter radius:- "); ===>
+	<=== scanf("%d",&circumference_1_arg.r); ===>
+
+	result_2 = circumference_1(&circumference_1_arg, clnt);
+	if (result_2 == (float *) NULL) {
+		clnt_perror (clnt, "call failed");
+	}else{
+		printf("The are is: %.2lf", *result_2);
+	}
+
+	<=== printf("\nEnter radius:- "); ===>
+	<=== scanf("%d",&diameter_1_arg.r); ===>
+
+	result_3 = diameter_1(&diameter_1_arg, clnt);
+	if (result_3 == (float *) NULL) {
+		clnt_perror (clnt, "call failed");
+	}else{
+		<=== printf("The are is: %.2lf", *result_3); ===>
+	}
+
+#ifndef	DEBUG
+	clnt_destroy (clnt);
+#endif	 /* DEBUG */
+}
+int
+main (int argc, char *argv[])
+{
+	char *host;
+	if (argc < 2) {
+		printf ("usage: %s server_host\n", argv[0]);
+		exit (1);
+	}
+	host = argv[1];
+	criclepro_1 (host);
+exit (0);
+}
+
+<========== Run ==========>
+make -f Makefile.circle
+sudo ./circle_server
+sudo ./circle_client localhost --> New terminal <--  
+
+
+<---------- Array adding RPC ---------->
+1) name.x
+struct name_in{
+	char fname[20];
+	char lname[20];	
+};
+program nameprog{
+	version namever{
+		char concatname(name_in) = 2;
+	} = 1;
+} = 0x21234567;
+
+<========== Run ==========>
+rpcgen -aC name.x
+
+2) name_client.c
+#include "name.h"
+void
+nameprog_1(char *host)
+{
+	CLIENT *clnt;
+	char  *result_1;
+	name_in  concatname_1_arg;
+
+#ifndef	DEBUG
+	clnt = clnt_create (host, nameprog, namever, "udp");
+	if (clnt == NULL) {
+		clnt_pcreateerror (host);
+		exit (1);
+	}
+#endif	/* DEBUG */
+
+	<=== printf("Enter first name: "); ===>
+	<=== scanf("%s", concatname_1_arg.fname); ===>
+
+	<=== printf("Enter last name: "); ===>
+	<=== scanf("%s", concatname_1_arg.lname); ===>
+
+	result_1 = concatname_1(&concatname_1_arg, clnt);
+	if (result_1 == (char *) NULL) {
+		clnt_perror (clnt, "call failed");
+	}else{
+		<=== printf("The name is: %s", *result_1); ===>
+	}
+
+#ifndef	DEBUG
+	clnt_destroy (clnt);
+#endif	 /* DEBUG */
+}
+int
+main (int argc, char *argv[])
+{
+	char *host;
+	if (argc < 2) {
+		printf ("usage: %s server_host\n", argv[0]);
+		exit (1);
+	}
+	host = argv[1];
+	nameprog_1 (host);
+exit (0);
+}
+
+3) name_server.c
+#include "circle.h"
+float *
+area_1_svc(radius *argp, struct svc_req *rqstp)
+{
+	<=== static float  result; ===>
+	<=== result = argp->r * argp->r*3.14; ===>	
+	<=== return &result; ===>
+}
+float *
+circumference_1_svc(radius *argp, struct svc_req *rqstp)
+{
+	<=== static float  result; ===>
+	<=== result = argp->r*3.14*2; ===>
+	<=== return &result; ===>
+}
+float *
+diameter_1_svc(radius *argp, struct svc_req *rqstp)
+{
+	<=== static float  result; ===>
+	<=== result = argp->r*2; ===>
+	<=== return &result; ===>
+}
+
+<========== Run ==========>
+make -f Makefile.name
+sudo ./name_server
+sudo ./name_client localhost --> New terminal <--  
+
+
+<---------- Avarage RPC ---------->
+1) cal.x
+struct numbers{
+	float num1;
+	float num2;
+	float num3;
+};
+program calpro{
+	version calver{
+		float avarage(numbers) = 2;
+	} = 1;
+} = 0x21234567;
+
+<========== Run ==========>
+rpcgen -aC cal.x
+
+2) cal_client.c
+#include "cal.h"
+void
+calpro_1(char *host)
+{
+	CLIENT *clnt;
+	float  *result_1;
+	numbers  avarage_1_arg;
+#ifndef	DEBUG
+	clnt = clnt_create (host, calpro, calver, "udp");
+	if (clnt == NULL) {
+		clnt_pcreateerror (host);
+		exit (1);
+	}
+#endif	/* DEBUG */
+
+	<=== printf("Enter Mark 1: "); ===>
+	<=== scanf("%f", &avarage_1_arg.num1); ===>
+
+
+	<=== printf("Enter Mark 2: "); ===>
+	<=== scanf("%f", &avarage_1_arg.num2); ===>
+
+
+	<=== printf("Enter Mark 3: "); ===>
+	<=== scanf("%f", &avarage_1_arg.num3); ===>
+
+	result_1 = avarage_1(&avarage_1_arg, clnt);
+	if (result_1 == (float *) NULL) {
+		clnt_perror (clnt, "call failed");
+	}else{
+		<=== printf("The Average of Three marks is:- %f \n", *result_1); ===>
+	}
+#ifndef	DEBUG
+	clnt_destroy (clnt);
+#endif	 /* DEBUG */
+}
+int
+main (int argc, char *argv[])
+{
+	char *host;
+	if (argc < 2) {
+		printf ("usage: %s server_host\n", argv[0]);
+		exit (1);
+	}
+	host = argv[1];
+	calpro_1 (host);
+exit (0);
+}
+
+3) cal_server.c
+#include "cal.h"
+float *
+avarage_1_svc(numbers *argp, struct svc_req *rqstp)
+{
+	<=== static float  result; ===>
+	<=== result = (argp->num1 + argp->num2 + argp->num3) / 3; ===>
+	<=== return &result; ===>
+}
+<========== Run ==========>
+make -f Makefile.cal
+sudo ./cal_server
+sudo ./cal_client localhost --> New terminal <--  
+
+
+<---------- Factorial RPC ---------->
+1) fac.x
+struct fac{
+	int n;
+};
+program facPro{
+	version facver{
+		int factorialfun(fac) = 2;
+	} = 1;
+} = 0x21234567;
+
+<========== Run ==========>
+rpcgen -aC facPro.x
+
+2)fac_server.c
+#include "fac.h"
+int *
+factorialfun_1_svc(fac *argp, struct svc_req *rqstp)
+{
+	<=== static int  result; ===>
+	<=== int res = 1; ===>
+	<=== int num = argp->n; ===>
+	<=== for(int i = 1; i<= num; i++){ ===>
+	<=== 	res = res * i; ===>
+	<=== } ===>
+	<=== result = res; ===>
+	<=== return &result; ===>
+}
+
+3) fac_client.c
+#include "fac.h"
+void
+facpro_1(char *host)
+{
+	CLIENT *clnt;
+	int  *result_1;
+	fac  factorialfun_1_arg;
+
+#ifndef	DEBUG
+	clnt = clnt_create (host, facPro, facver, "udp");
+	if (clnt == NULL) {
+		clnt_pcreateerror (host);
+		exit (1);
+	}
+#endif	/* DEBUG */
+
+	<=== printf("Enter Number to calculate Factorial:-  "); ===>
+	<=== scanf("%d", &factorialfun_1_arg.n); ===>
+
+	result_1 = factorialfun_1(&factorialfun_1_arg, clnt);
+	if (result_1 == (int *) NULL) {
+		clnt_perror (clnt, "call failed");
+	}else{
+		<=== printf("Factorial is = %d \n", *result_1); ===>
+	}
+#ifndef	DEBUG
+	clnt_destroy (clnt);
+#endif	 /* DEBUG */
+}
+int
+main (int argc, char *argv[])
+{
+	char *host;
+
+	if (argc < 2) {
+		printf ("usage: %s server_host\n", argv[0]);
+		exit (1);
+	}
+	host = argv[1];
+	facpro_1 (host);
+exit (0);
+}
+
+<========== Run ==========>
+make -f Makefile.fac
+sudo ./fac_server
+sudo ./fac_client localhost --> New terminal <--
+
+<---------- RPC---------->
+1) numcon.x
+struct number{
+	int num;
+};
+program convoprogram{
+	version convoversion{
+		string convertnum(number) = 2;
+	} = 1;
+} = 0x21234567;
+
+<========== Run ==========>
+rpcgen -aC numcon.x
+
+2) numcon_server.c
+#include "numcon.h"
+char **
+convertnum_1_svc(number *argp, struct svc_req *rqstp)
+{
+	<=== static char * result; ===>
+	<=== switch(argp->num){ ===>
+	<=== case 0: ===>
+	<=== 	result = "Zero"; ===>
+	<=== 	break; ===>
+	<=== case 1: ===>
+	<=== 	result = "one"; ===>
+	<=== 	break; ===>
+	<=== case 2: ===>
+	<=== 	result = "Two"; ===>
+	<=== 	break; ===>
+	<=== case 3: ===>
+	<=== 	result = "Three"; ===>
+	<=== 	break; ===>
+	<=== case 4: ===>
+	<=== 	result = "Four"; ===>
+	<=== 	break; ===>
+	<=== case 5: ===>
+	<=== 	result = "Five"; ===>
+	<=== 	break; ===>
+	<=== case 6: ===>
+	<=== 	result = "Six"; ===>
+	<=== 	break; ===>
+	<=== case 7: ===>
+	<=== 	result = "Seven"; ===>
+	<=== 	break; ===>
+	<=== case 8: ===>
+	<=== 	result = "Eight"; ===>
+	<=== 	break; ===>
+	<=== case 9: ===>
+	<=== 	result = "Nine"; ===>
+	<=== 	break; ===>
+	<=== default: ===>
+	<=== 	result = "Invalid"; ===>
+	<=== 	break; ===>
+	<=== } ===>
+	<=== return &result; ===>
+}
+3) numcon_client.c
+#include "numcon.h"
+void
+convoprogram_1(char *host)
+{
+	CLIENT *clnt;
+	char * *result_1;
+	number  convertnum_1_arg;
+
+#ifndef	DEBUG
+	clnt = clnt_create (host, convoprogram, convoversion, "udp");
+	if (clnt == NULL) {
+		clnt_pcreateerror (host);
+		exit (1);
+	}
+#endif	/* DEBUG */
+
+	<=== printf("Enter the number that want to convert into word:- "); ===>
+	<=== scanf("%d", &convertnum_1_arg.num); ===>
+
+
+	result_1 = convertnum_1(&convertnum_1_arg, clnt);
+	if (result_1 == (char **) NULL) {
+		clnt_perror (clnt, "call failed");
+	}else{
+		<=== printf("Word is:-  %s\n", *result_1); ===>
+	}
+
+#ifndef	DEBUG
+	clnt_destroy (clnt);
+#endif	 /* DEBUG */
+}
+int
+main (int argc, char *argv[])
+{
+	char *host;
+
+	if (argc < 2) {
+		printf ("usage: %s server_host\n", argv[0]);
+		exit (1);
+	}
+	host = argv[1];
+	convoprogram_1 (host);
+exit (0);
+}
+
+<========== Run ==========>
+make -f Makefile.numcon
+sudo ./numcon_server
+sudo ./numcon_client localhost --> New terminal <-- 
+
+
+<---------- Letter RPC ---------->
+1) vow.x
+struct letter{
+	char c;	
+};
+program letterPro{
+	version letterver{
+		string vowel(letter) = 2;
+	} = 1;
+
+} = 0x21234567;
+
+<========== Run ==========>
+rpcgen -aC vow.x
+
+2) vow_server.c
+#include "vow.h"
+
+char **
+vowel_1_svc(letter *argp, struct svc_req *rqstp)
+{
+	<=== static char * result; ===>
+	<=== if(argp->c == 'a' || argp->c == 'e' || argp->c ==  'i' || argp->c ==  'o' || argp->c ==  'u'){ ===>
+	<=== 	result = "vowel"; ===>
+	<=== }else if (argp->c == 'A' || argp->c == 'E' || argp->c ==  'O' || argp->c ==  'I' || argp->c ==  'O' || argp->c ==  'U'){ ===>
+	<=== 	result = "vowel"; ===>
+	<=== }else{ ===>
+	<=== 	result = "constant"; ===>
+	<=== } ===>
+	<=== return &result; ===>
+} 
+
+
+3) vow_client.c
+#include "vow.h"
+void
+letterpro_1(char *host)
+{
+	CLIENT *clnt;
+	char * *result_1;
+	letter  vowel_1_arg;
+#ifndef	DEBUG
+	clnt = clnt_create (host, letterPro, letterver, "udp");
+	if (clnt == NULL) {
+		clnt_pcreateerror (host);
+		exit (1);
+	}
+#endif	/* DEBUG */
+
+	<=== printf("ENter the word: "); ===>
+	<=== scanf("%c", &vowel_1_arg.c); ===>
+
+	result_1 = vowel_1(&vowel_1_arg, clnt);
+	if (result_1 == (char **) NULL) {
+		clnt_perror (clnt, "call failed");
+	}else{
+		<=== printf("The Letter is: %s\n", *result_1); ===>
+	}
+
+#ifndef	DEBUG
+	clnt_destroy (clnt);
+#endif	 /* DEBUG */
+}
+int
+main (int argc, char *argv[])
+{
+	char *host;
+
+	if (argc < 2) {
+		printf ("usage: %s server_host\n", argv[0]);
+		exit (1);
+	}
+	host = argv[1];
+	letterpro_1 (host);
+exit (0);
+}
+
+<========== Run ==========>
+make -f Makefile.vow
+sudo ./vow_server
+sudo ./vow_client localhost --> New terminal <-- 
+
+
+
+<---------- Reverse Number RPC ---------->
+1)reverse.x
+
+struct number{
+	int num;	
+};
+program reversePro{
+	version reverseVer{
+		int rev(number) = 2;
+	} = 1;
+} = 0x21234567;
+
+<========== Run ==========>
+rpcgen -aC reverse.x
+
+2)reverse_server.c
+
+#include "reverse.h"
+int *
+rev_1_svc(number *argp, struct svc_req *rqstp)
+{
+	<=== static int  result; ===>
+	<=== int n = argp->num; ===>
+	<=== int reversed = 0; ===>
+	<=== while(n !=0){ ===>
+	<=== 	int digit = n % 10; ===>
+	<=== 	reversed = reversed * 10 + digit; ===>
+	<=== 	n /= 10; ===>
+	<=== } ===>
+	<=== result = reversed; ===>
+	<=== return &result; ===>
+}
+3)reverse_client.c
+
+#include "reverse.h"
+void
+reversepro_1(char *host)
+{
+	CLIENT *clnt;
+	int  *result_1;
+	number  rev_1_arg;
+#ifndef	DEBUG
+	clnt = clnt_create (host, reversePro, reverseVer, "udp");
+	if (clnt == NULL) {
+		clnt_pcreateerror (host);
+		exit (1);
+	}
+#endif	/* DEBUG */
+
+	<=== printf("Enter Number to reverse:- "); ===>
+	<=== scanf("%d", &rev_1_arg.num); ===>
+
+	result_1 = rev_1(&rev_1_arg, clnt);
+	if (result_1 == (int *) NULL) {
+		clnt_perror (clnt, "call failed");
+	}else{
+		<=== printf("The Reverse Number is: %d\n", *result_1); ===>
+	}
+#ifndef	DEBUG
+	clnt_destroy (clnt);
+#endif	 /* DEBUG */
+}
+int
+main (int argc, char *argv[])
+{
+	char *host;
+	if (argc < 2) {
+		printf ("usage: %s server_host\n", argv[0]);
+		exit (1);
+	}
+	host = argv[1];
+	reversepro_1 (host);
+exit (0);
+}
+
+<========== Run ==========>
+make -f Makefile.reverse
+sudo ./reverse_server
+sudo ./reverse_client localhost --> New terminal <--
+
+
+<---------- ---------->
+<---------- ---------->
+<---------- ---------->
+<---------- ---------->
+<---------- ---------->
+<---------- ---------->
+<---------- ---------->
+<---------- ---------->
+<---------- ---------->
+<---------- ---------->
+
+
+<---------- Calculator RMI ---------->
+
+1) CalInterface.java
+
+import java.rmi.*;
+
+public interface CalInterface extends Remote{
+	public int sum(int a, int b) throws RemoteException;
+	public int sub(int a, int b) throws RemoteException;
+	public int dev(int a, int b) throws RemoteException;
+	public int mul(int a, int b) throws RemoteException;
+}
+
+2) Cal.java
+
+import java.rmi.*;
+import java.rmi.server.*;
+
+public class Cal extends UnicastRemoteObject implements CalInterface{
+	public Cal() throws RemoteException{}
+	public int sum(int a, int b){
+		return a+b;
+	}
+	public int sub(int a, int b){
+		if(a<b){
+			return b-a;
+		}else{
+			return a-b;
+		}
+	}
+	public int dev(int a, int b){
+		return a/b;
+	}
+	public int mul(int a, int b){
+		return a*b;
+	}
+}
+
+3) CalServer.java
+
+import java.rmi.*;
+import java.rmi.registry.*;
+
+public class CalServer{
+	public static void main(String[] args) {
+		try{
+			Cal cal1 = new Cal();
+			Naming.rebind("calc", cal1);
+			System.out.println("Server Ready.");
+		}catch(Exception e){
+			System.out.println("Error:" +e);
+		}
+	}
+}
+
+4) CalClient.java
+
+import java.rmi.*;
+import java.util.Scanner;
+
+public class CalClient{
+	public static void main(String[] args) {
+		try{
+			CalInterface cal1 = (CalInterface) Naming.lookup("calc");
+			Scanner sc = new Scanner(System.in);
+
+			System.out.println("Enter First Number:");
+			int a = sc.nextInt();
+
+			System.out.println("Enter Second Number:");
+			int b = sc.nextInt();
+
+			System.out.println("Summation: " +cal1.sum(a,b));
+			System.out.println("Substract: " +cal1.sub(a,b));
+			System.out.println("Devision: " +cal1.dev(a,b));
+			System.out.println("Multiply: " +cal1.mul(a,b));
+		}catch(Exception e){
+			System.out.println("Error:" +e);
+		}
+	}
+}
+
+<========== Run ==========>
+javac CalInterface.java
+javac Cal.java
+javac CalClient.java
+javac CalServer.java
+rmic Cal
+rmiregistry &
+java CalServer
+java CalClient --> New terminal <--
+
+
+import java.rmi.*;
+
+public interface SqureInterface extends Remote{
+	public int squre(int a) throws RemoteException;
+}
+===============
+import java.rmi.*;
+import java.rmi.server.*;
+
+
+public class Squre extends UnicastRemoteObject implements SqureInterface{
+
+	public Squre() throws RemoteException{}
+
+	public int squre(int a){
+
+		return (a * a);
+	}
+}
+================
+import java.rmi.*;
+import java.rmi.registry.*;
+
+public class SqureServer{
+
+	public static void main(String[] args) {
+		try{
+			Squre squre1 = new Squre();
+			Naming.rebind("squarevalue", squre1);
+			System.out.println("Server ready");
+		}catch(Exception e){
+			System.out.println("Error: " + e);
+		}
+	}
+}
+===============
+
+import java.rmi.*;
+import java.util.Scanner;
+
+public class SqureClient{
+	public static void main(String[] args) {
+		try{
+			SqureInterface squre1 = (SqureInterface) Naming.lookup("squarevalue");
+
+			Scanner in = new Scanner(System.in);
+
+			System.out.println("Enter Square number: ");
+			int num = in.nextInt();
+
+			System.out.println("Square value : \n" + squre1.squre(num));
+
+		}catch(Exception e){
+			System.out.println("Error: " + e);
+		}
+	}
+}
+===============
+
+<---------- Array Sum MPI ---------->
+
+1) Array.c
+#include<stdio.h>
+#include<mpi.h>
+
+int main(int argc, char** argv){
+	int arr[100],size,i,sum=0;
+
+	
+	MPI_Init(NULL, NULL);
+	printf("Enter array size\n");
+	scanf("%d", &size);
+	printf("Enter array elements\n");
+	for(i=0; i < size; i++)
+		scanf("%d", &arr[i]);
+	for(i=0; i < size; i++)
+		sum = sum + arr[i];
+	printf("sum of the array = %d\n", sum);
+	MPI_Finalize();
+	return 0;
+}
+
+<========== Run ==========>
+mpicc Array.c -o mpi1
+mpirun -np 1 ./mpi1
+
+<----------  ---------->
+
+***//MPI//***
+
+
+#include <stdio.h>
+#include <mpi.h>
+
+
+int main(int argc, char const *argv[])
+{
+	MPI_Init(NULL,NULL);
+	printf("\nCIS22042-PRACTICAL FOR CLOUD\n");
+
+
+	int world_size;
+	MPI_Comm_size(MPI_COMM_WORLD,&world_size);
+	int world_rank;
+	MPI_Comm_rank(MPI_COMM_WORLD,&world_rank);
+
+	char processor_name[MPI_MAX_PROCESSOR_NAME];
+	int name_len;
+
+	MPI_Get_processor_name(processor_name,& name_len);
+
+	printf("processor_name:%s,rank:%d; number of processesors:%d\n",processor_name,world_rank,world_size );		
+
+	MPI_Finalize();
+	return 0;}
+
+
+***MPI_Abort***
+
+
+#include <stdio.h>
+#include <mpi.h>
+
+int main(int argc, char const *argv[])
+{
+	MPI_Init(NULL,NULL);
+
+	int world_size;
+
+	MPI_Comm_size(MPI_COMM_WORLD,&world_size);
+
+	if(world_size < 4){
+		printf("\nProssor size not enough\n");
+		MPI_Abort(MPI_COMM_WORLD, 2);
+	}else{
+		printf("\nMPI CLUD PROGRAMIMMNG\n");
+	}
+
+	MPI_Finalize();
+}
+
+****
+
+touch filename.c
+mpicc filename.c -o mpi1
+mpirun -np 5v./mpi1
+
+
+**//RPC//**
+
+struct num{
+	float r;
+};
+
+program RAD_PROG{
+	version RAD_VERS{
+
+		float perimeter(num)=1;
+		float area(num)=2;
+	}=3;
+}=0x1234567;
+
+
+***client***
+
+
+#include "radius.h"
+
+
+void
+rad_prog_3(char *host)
+{
+	CLIENT *clnt;
+	float  *result_1;
+	num  perimeter_3_arg;
+	float  *result_2;
+	num  area_3_arg;
+
+#ifndef	DEBUG
+	clnt = clnt_create (host, RAD_PROG, RAD_VERS, "udp");
+	if (clnt == NULL) {
+		clnt_pcreateerror (host);
+		exit (1);
+	}
+#endif	/* DEBUG */
+
+
+	printf("ENTER YOUR VALUE:\n");
+	scanf("%f",&(perimeter_3_arg.r));
+
+
+	result_1 = perimeter_3(&perimeter_3_arg, clnt);
+	if (result_1 == (float *) NULL) {
+		clnt_perror (clnt, "call failed");
+	}
+	else
+	{
+		printf("PERIMETER IS :%f\n",*result_1);
+	}
+
+	result_2 = area_3(&perimeter_3_arg, clnt);
+	if (result_2 == (float *) NULL) {
+		clnt_perror (clnt, "call failed");
+	}
+	else{
+		printf("AREA IS :%f\n",*result_2);
+	}
+
+#ifndef	DEBUG
+	clnt_destroy (clnt);
+#endif	 /* DEBUG */
+}
+
+int
+main (int argc, char *argv[])
+{
+	char *host;
+
+	if (argc < 2) {
+		printf ("usage: %s server_host\n", argv[0]);
+		exit (1);
+	}
+	host = argv[1];
+	rad_prog_3 (host);
+exit (0);
+}
+
+
+***server***
+
+
+#include "radius.h"
+
+float *
+perimeter_3_svc(num *argp, struct svc_req *rqstp)
+{
+	static float  result;
+
+	float fi=3.14;
+	result=2*fi*argp->r;
+
+	return &result;
+}
+
+float *
+area_3_svc(num *argp, struct svc_req *rqstp)
+{
+	static float  result;
+
+	float fi=3.14;
+	result=fi*argp->r*argp->r;
+
+	return &result;
+}
